@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Recadinhos™ - Sair</title>
+</head>
+<body>
+<h1>Quer sair do site do Recadinhos™?</h1>
+<p>Você sabe que é só fechar a guia do navegador, né? 😅</p>
+<p>É, achamos que sim. Mas você se pergunta: "Vocês fizeram uma página só pra isso?" E a gente responde: "Sim!" 😂</p>
+<p>Sério, valeu por usar o Recadinhos™. A gente não sabia que alguém no mundo iria usar isso. Tchau, e volta logo! 😉👋🏻</p>
+
+<!-- Botão de log-out -->
+<button id="logoutBtn">Fazer log-out</button>
+
+<script>
+  const btn = document.getElementById('logoutBtn');
+  btn.addEventListener('click', () => {
+    localStorage.removeItem('usuarioLogado');
+    alert('Você saiu do Recadinhos™. Até logo!');
+    window.location.href = 'index.html';
+  });
+</script>
+
+<footer>
+  <p>© Retropixel™, 2025. Todos os direitos reservados.</p>
+</footer>
+</body>
+</html>

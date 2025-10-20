@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Recadinhos™ — Criar conta / Entrar</title>
+</head>
+<body>
+
+<table>
+  <tr>
+    <h1><strong>Recadinhos™</strong></h1>
+  </tr>
+  <tr>
+    <td>
+      [ <a href="index.html">🏠 Início</a> ]
+      [ <a href="Sobre.html">📄 Sobre</a> ]
+      [ <a href="Criar_conta.html">🙂 Criar conta</a> ]
+      [ <a href="Postagens.html">📧 Postagens</a> ]
+      [ <a href="Sair.html">❌ Sair</a> ]
+    </td>
+  </tr>
+</table>
+
+<h1>Criar conta</h1>
+
+<form id="formConta">
+  <label for="usuario">Usuário:</label><br>
+  <input type="text" id="usuario" name="usuario" maxlength="20" required><br><br>
+
+  <label for="nome">Nome completo:</label><br>
+  <input type="text" id="nome" name="nome" maxlength="40" required><br><br>
+
+  <label for="senha">Senha:</label><br>
+  <input type="password" id="senha" name="senha" maxlength="20" required><br><br>
+
+  <input type="submit" value="Criar conta">
+  <input type="reset" value="Limpar">
+</form>
+
+<hr>
+
+<h1>Entrar</h1>
+
+<form id="formLogin">
+  <label for="loginUsuario">Usuário:</label><br>
+  <input type="text" id="loginUsuario" name="loginUsuario" maxlength="20" required><br><br>
+
+  <label for="loginSenha">Senha:</label><br>
+  <input type="password" id="loginSenha" name="loginSenha" maxlength="20" required><br><br>
+
+  <input type="submit" value="Entrar">
+</form>
+
+<hr>
+<p>Após criar ou entrar, você será levado ao mural de <a href="Postagens.html">Recadinhos</a>.</p>
+
+<script>
+// 🔗 COLE SUA API AQUI!
+const API_URL = "https://script.google.com/macros/s/AKfycbwd7bdpTOW3fFEdRT6zWe--U6psEl8gnzDI_VnUcMGK9WEAyQ62QgK31TwYdbh_5eU-/exec";
+
+// ===== CRIAR CONTA =====
+document.getElementById('formConta').addEventListener('submit', e => {
+  e.preventDefault();
+
+  const usuario = document.getElementById('usuario').value.trim();
+  const nome = document.getElementById('nome').value.trim();
+  const senha = document.getElementById('senha').value.trim();
+
+  if (!usuario || !nome || !senha) {
+    alert('Por favor, preencha todos os campos.');
+    return;
+  }
+
+  fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      tipo: 'conta',
+      usuario,
+      nome,
+      senha
+    })
+  })
+  .then(() => {
+    localStorage.setItem('usuarioLogado', usuario);
+    alert('Conta criada com sucesso! Bem-vindo(a), ' + nome + '!');
+    window.location.href = 'Postagens.html';
+  })
+  .catch(() => alert('Erro ao criar conta. Tente novamente.'));
+});
+
+// ===== ENTRAR =====
+document.getElementById('formLogin').addEventListener('submit', e => {
+  e.preventDefault();
+
+  const usuario = document.getElementById('loginUsuario').value.trim();
+  const senha = document.getElementById('loginSenha').value.trim();
+
+  if (!usuario || !senha) {
+    alert('Por favor, preencha todos os campos.');
+    return;
+  }
+
+  fetch(API_URL + "?tipo=contas")
+    .then(r => r.json())
+    .then(contas => {
+      const conta = contas.find(c => c.usuario === usuario && c.senha === senha);
+      if (conta) {
+        localStorage.setItem('usuarioLogado', usuario);
+        alert('Bem-vindo(a) de volta, ' + conta.nome + '!');
+        window.location.href = 'Postagens.html';
+      } else {
+        alert('Usuário ou senha incorretos.');
+      }
+    })
+    .catch(() => alert('Erro ao tentar entrar.'));
+});
+</script>
+
+</body>
+</html>
