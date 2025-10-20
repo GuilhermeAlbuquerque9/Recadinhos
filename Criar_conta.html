@@ -55,8 +55,8 @@
 <p>Após criar ou entrar, você será levado ao mural de <a href="Postagens.html">Recadinhos</a>.</p>
 
 <script>
-// 🔗 COLE SUA API AQUI!
-const API_URL = "https://script.google.com/macros/s/AKfycbwd7bdpTOW3fFEdRT6zWe--U6psEl8gnzDI_VnUcMGK9WEAyQ62QgK31TwYdbh_5eU-/exec";
+// API do Google Sheets
+const API_URL = "https://script.google.com/macros/s/AKfycbxFfDNxXYIRRE5JXTqro_09yMapNPyosCLKeSfeuN1KfXtK_Ez1XDJBMYwlNmJlNRizYA/exec";
 
 // ===== CRIAR CONTA =====
 document.getElementById('formConta').addEventListener('submit', e => {
@@ -74,16 +74,21 @@ document.getElementById('formConta').addEventListener('submit', e => {
   fetch(API_URL, {
     method: 'POST',
     body: JSON.stringify({
-      tipo: 'conta',
+      tipo: 'criarConta',
       usuario,
       nome,
       senha
     })
   })
-  .then(() => {
-    localStorage.setItem('usuarioLogado', usuario);
-    alert('Conta criada com sucesso! Bem-vindo(a), ' + nome + '!');
-    window.location.href = 'Postagens.html';
+  .then(r => r.json())
+  .then(res => {
+    if(res.status === "ok"){
+      localStorage.setItem('usuarioLogado', usuario);
+      alert(res.mensagem);
+      window.location.href = 'Postagens.html';
+    } else {
+      alert(res.mensagem);
+    }
   })
   .catch(() => alert('Erro ao criar conta. Tente novamente.'));
 });
