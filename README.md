@@ -1,4 +1,4 @@
-# 💌 Recadinhos™
+# 📧 Recadinhos™
 
 **Recadinhos™** é uma rede social retrô criada pela **Retropixel™** em 2025.  
 Feita com amor, HTML puro e um toque dos anos 1990 — simples, nostálgica e funcional de verdade.  
@@ -33,13 +33,6 @@ Recadinhos/
 
 O site roda diretamente pelo **GitHub Pages**, sem servidor adicional.  
 A persistência de dados acontece através da API do **Google Apps Script**, que interage com uma planilha pública do Google Sheets.
-
-Para fazer o seu próprio:
-1. Crie uma planilha com abas **contas** e **recadinhos**.  
-2. Cole o script `doGet/doPost` no Google Apps Script.  
-3. Implante como “Aplicativo da Web” com acesso para “Qualquer pessoa”.  
-4. Cole o link da API onde aparece  
-   `🔗 COLE SUA API AQUI!` nos arquivos HTML.
 
 ---
 
