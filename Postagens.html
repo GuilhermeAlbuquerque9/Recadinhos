@@ -2,110 +2,138 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <title>Recadinhos™ — Mural</title>
+  <title>Recadinhos™ — Postagens</title>
 </head>
 <body>
 
-<table>
-  <tr>
-    <h1><strong>Recadinhos™</strong></h1>
-  </tr>
-  <tr>
-    <td>
-      [ <a href="index.html">🏠 Início</a> ]
-      [ <a href="Sobre.html">📄 Sobre</a> ]
-      [ <a href="Criar_conta.html">🙂 Criar conta</a> ]
-      [ <a href="Postagens.html">📧 Postagens</a> ]
-      [ <a href="Sair.html">❌ Sair</a> ]
-    </td>
-  </tr>
-</table>
+  <table>
+    <tr>
+      <h1><strong>Recadinhos™</strong></h1>
+    </tr>
+    <tr>
+      <td>
+        [ <a href="index.html">🏠 Início</a> ]
+        [ <a href="Sobre.html">📄 Sobre</a> ]
+        [ <a href="Criar_conta.html">🙂 Criar conta</a> ]
+        [ <a href="Postagens.html">📧 Postagens</a> ]
+        [ <a href="Sair.html">❌ Sair</a> ]
+      </td>
+    </tr>
+  </table>
 
-<h1>Mural de Recadinhos</h1>
+  <h1>Mural de Recadinhos</h1>
 
-<form id="formRecado">
-  <label for="mensagem">Seu recadinho:</label><br>
-  <textarea id="mensagem" name="mensagem" rows="5" cols="40" placeholder="Escreva algo... Você pode mencionar @nomes aqui!" required></textarea><br><br>
+  <form id="formRecadinho">
+    <label for="autor">Usuário:</label><br>
+    <input type="text" id="autor" name="autor" maxlength="20" required readonly><br><br>
 
-  <input type="submit" value="Publicar Recadinho">
-  <input type="reset" value="Limpar">
-</form>
+    <label for="mensagem">Seu recadinho:</label><br>
+    <textarea id="mensagem" name="mensagem" rows="5" cols="40" placeholder="Escreva algo... Você pode mencionar @nomes aqui!" required></textarea><br><br>
 
-<h2>Recadinhos Recentes:</h2>
-<ul id="listaRecados"></ul>
+    <input type="submit" value="Publicar Recadinho">
+    <input type="reset" value="Limpar">
+  </form>
 
-<h2>Recadinhos pra Você:</h2>
-<ul id="listaPraVoce"></ul>
+  <hr>
 
-<script>
-// API do Google Sheets
-const API_URL = "https://script.google.com/macros/s/AKfycbxFfDNxXYIRRE5JXTqro_09yMapNPyosCLKeSfeuN1KfXtK_Ez1XDJBMYwlNmJlNRizYA/exec";
+  <h2>📬 Recadinhos pra você</h2>
+  <ul id="listaPraVoce"></ul>
 
-const form = document.getElementById('formRecado');
-const listaRecados = document.getElementById('listaRecados');
-const listaPraVoce = document.getElementById('listaPraVoce');
+  <h2>🌐 Recadinhos públicos</h2>
+  <ul id="listaRecados"></ul>
 
-let usuarioAtual = localStorage.getItem('usuarioLogado');
+  <script>
+    // 🔗 COLE SUA API AQUI!
+    const API_URL = "https://script.google.com/macros/s/AKfycbxFfDNxXYIRRE5JXTqro_09yMapNPyosCLKeSfeuN1KfXtK_Ez1XDJBMYwlNmJlNRizYA/exec";
 
-// Função para atualizar listas
-function atualizarListas() {
-  listaRecados.innerHTML = '';
-  listaPraVoce.innerHTML = '';
+    // Carregar usuário logado
+    const usuarioAtual = localStorage.getItem("usuario");
+    if (!usuarioAtual) {
+      alert("Você precisa estar logado para ver os recadinhos!");
+      window.location.href = "Criar_conta.html";
+    } else {
+      document.getElementById("autor").value = usuarioAtual;
+    }
 
-  fetch(API_URL + "?tipo=recadinhos")
-    .then(r => r.json())
-    .then(recados => {
-      recados.forEach(r => {
-        // Todos veem
-        const li = document.createElement('li');
-        li.textContent = `@${r.autor}: ${r.mensagem}`;
-        listaRecados.appendChild(li);
+    // Enviar recadinho
+    document.getElementById("formRecadinho").addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-        // Mural "pra você"
-        if(usuarioAtual && r.mensagem.includes('@'+usuarioAtual)){
-          const li2 = document.createElement('li');
-          li2.textContent = `@${r.autor} mencionou você: ${r.mensagem}`;
-          listaPraVoce.appendChild(li2);
-        }
-      });
-    });
-}
+      const autor = document.getElementById("autor").value.trim();
+      const mensagem = document.getElementById("mensagem").value.trim();
 
-// Publicar novo recado
-form.addEventListener('submit', e => {
-  e.preventDefault();
-  const mensagem = document.getElementById('mensagem').value.trim();
-
-  if(!usuarioAtual){
-    alert("Você precisa estar logado para publicar.");
-    return;
-  }
-
-  if(mensagem){
-    fetch(API_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        tipo: 'novoRecado',
-        autor: usuarioAtual,
-        mensagem
-      })
-    })
-    .then(r => r.json())
-    .then(res => {
-      if(res.status === "ok"){
-        form.reset();
-        atualizarListas();
-      } else {
-        alert(res.mensagem);
+      if (!mensagem) {
+        alert("Digite um recadinho!");
+        return;
       }
-    })
-    .catch(() => alert('Erro ao publicar recadinho.'));
-  }
-});
 
-// Atualiza a lista na abertura
-atualizarListas();
-</script>
+      const dados = {
+        tipo: "novoRecado",
+        autor,
+        mensagem,
+        data: new Date().toLocaleString()
+      };
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify(dados)
+        });
+        const txt = await res.text();
+        alert("Recadinho enviado com sucesso!");
+        document.getElementById("mensagem").value = "";
+        carregarRecadinhos();
+      } catch (err) {
+        alert("Erro ao enviar recadinho!");
+        console.error(err);
+      }
+    });
+
+    // Carregar recadinhos
+    async function carregarRecadinhos() {
+      document.getElementById("listaRecados").innerHTML = "<li>Carregando recadinhos...</li>";
+      document.getElementById("listaPraVoce").innerHTML = "";
+
+      try {
+        const res = await fetch(API_URL + "?tipo=recadinhos");
+        const recadinhos = await res.json();
+
+        const listaPublicos = document.getElementById("listaRecados");
+        const listaPrivados = document.getElementById("listaPraVoce");
+
+        listaPublicos.innerHTML = "";
+        listaPrivados.innerHTML = "";
+
+        // Mostrar recados
+        recadinhos.reverse().forEach(r => {
+          const li = document.createElement("li");
+          li.innerHTML = `<strong>@${r.autor}</strong>: ${r.mensagem}`;
+
+          // Se mencionar o usuário atual
+          if (r.mensagem.includes("@" + usuarioAtual)) {
+            listaPrivados.appendChild(li);
+          }
+          // Se for público (sem menção)
+          else if (!r.mensagem.includes("@")) {
+            listaPublicos.appendChild(li);
+          }
+        });
+
+        if (!listaPublicos.hasChildNodes()) {
+          listaPublicos.innerHTML = "<li>Nenhum recadinho público ainda.</li>";
+        }
+        if (!listaPrivados.hasChildNodes()) {
+          listaPrivados.innerHTML = "<li>Nenhum recadinho pra você ainda.</li>";
+        }
+
+      } catch (err) {
+        console.error("Erro ao carregar recadinhos:", err);
+        document.getElementById("listaRecados").innerHTML = "<li>Erro ao carregar recadinhos.</li>";
+      }
+    }
+
+    carregarRecadinhos();
+  </script>
 
 </body>
 </html>
