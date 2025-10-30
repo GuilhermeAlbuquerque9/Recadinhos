@@ -24,6 +24,9 @@
 <h1>Mural de Recadinhos</h1>
 
 <form id="formRecado">
+  <label for="autor">Usuário:</label><br>
+  <input type="text" id="autor" name="autor" maxlength="20" placeholder="@seunome" required><br><br>
+
   <label for="mensagem">Seu recadinho:</label><br>
   <textarea id="mensagem" name="mensagem" rows="5" cols="40" placeholder="Escreva algo... Você pode mencionar @nomes aqui!" required></textarea><br><br>
 
@@ -45,25 +48,26 @@
 // 🔗 COLE SUA API AQUI!
 const API_URL = "https://script.google.com/macros/s/AKfycbxFfDNxXYIRRE5JXTqro_09yMapNPyosCLKeSfeuN1KfXtK_Ez1XDJBMYwlNmJlNRizYA/exec";
 
-// Verifica login
-const usuarioAtual = localStorage.getItem('usuario');
-if (!usuarioAtual) {
-  alert('Você precisa estar logado para ver os recadinhos!');
-  window.location.href = 'Criar_conta.html';
-}
+// Pega usuário salvo ou deixa em branco
+const usuarioAtual = localStorage.getItem('usuario') || '';
 
 // Referências de elementos
 const form = document.getElementById('formRecado');
 const listaPublicos = document.getElementById('listaPublicos');
 const listaPrivados = document.getElementById('listaPrivados');
 
+// Preenche o campo "Usuário" se estiver logado
+document.getElementById('autor').value = usuarioAtual || '';
+
 // Publicar novo recado
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
+  const autor = document.getElementById('autor').value.trim();
   const mensagem = document.getElementById('mensagem').value.trim();
-  if (!mensagem) {
-    alert('Escreva algo antes de publicar!');
+
+  if (!autor || !mensagem) {
+    alert('Por favor, preencha o nome e o recadinho!');
     return;
   }
 
@@ -72,7 +76,7 @@ form.addEventListener('submit', async (e) => {
       method: 'POST',
       body: JSON.stringify({
         action: 'publicarRecado',
-        autor: usuarioAtual,
+        autor,
         mensagem
       })
     });
@@ -107,12 +111,12 @@ async function carregarRecadinhos() {
       // Identifica se há menções
       const mencoes = mensagem.match(/@\w+/g);
 
-      // Se há menções e o usuário atual está nelas, mostra em "pra você"
-      if (mencoes && mencoes.some(m => m.toLowerCase() === '@' + usuarioAtual.toLowerCase())) {
+      // Se há menções e o usuário atual está nelas → mostra em "pra você"
+      if (mencoes && usuarioAtual && mencoes.some(m => m.toLowerCase() === '@' + usuarioAtual.toLowerCase())) {
         li.textContent = `@${autor} para você: ${mensagem}`;
         listaPrivados.appendChild(li);
       }
-      // Se não há menções, é público
+      // Se não há menções → público
       else if (!mencoes) {
         li.textContent = `@${autor}: ${mensagem}`;
         listaPublicos.appendChild(li);
