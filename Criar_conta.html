@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <title>Recadinhos™ — Criar conta ou Entrar</title>
+  <title>Recadinhos™ — Criar conta / Entrar</title>
 </head>
 <body>
 
@@ -14,100 +14,94 @@
     <td>
       [ <a href="index.html">🏠 Início</a> ]
       [ <a href="Sobre.html">📄 Sobre</a> ]
-      [ <a href="Criar_conta.html">🙂 Criar conta</a> ]
+      [ <a href="Criar_conta.html">🙂 Criar conta / Entrar</a> ]
       [ <a href="Postagens.html">📧 Postagens</a> ]
       [ <a href="Sair.html">❌ Sair</a> ]
     </td>
   </tr>
 </table>
 
-<h1>Criar conta</h1>
+<h1>Criar conta / Entrar</h1>
 
-<form id="formCriar">
-  <label for="usuario">Usuário (sem espaços):</label><br>
-  <input type="text" id="usuario" name="usuario" maxlength="20" required><br><br>
+<h2>Criação de conta</h2>
+<form id="formCriarConta">
+  <label for="usuarioCriar">Usuário (sem espaços):</label><br>
+  <input type="text" id="usuarioCriar" name="usuario" maxlength="20" required><br><br>
 
-  <label for="nome">Nome completo:</label><br>
-  <input type="text" id="nome" name="nome" maxlength="60" required><br><br>
+  <label for="nomeCriar">Nome completo:</label><br>
+  <input type="text" id="nomeCriar" name="nome" maxlength="60" required><br><br>
 
-  <label for="senha">Senha:</label><br>
-  <input type="password" id="senha" name="senha" required><br><br>
+  <label for="senhaCriar">Senha:</label><br>
+  <input type="password" id="senhaCriar" name="senha" required><br><br>
 
   <input type="submit" value="Criar Conta">
+  <input type="reset" value="Limpar">
 </form>
 
-<br><hr><br>
-
-<h1>Entrar</h1>
-
+<h2>Entrar</h2>
 <form id="formLogin">
-  <label for="loginUsuario">Usuário:</label><br>
-  <input type="text" id="loginUsuario" name="loginUsuario" maxlength="20" required><br><br>
+  <label for="usuarioLogin">Usuário:</label><br>
+  <input type="text" id="usuarioLogin" name="usuarioLogin" maxlength="20" required><br><br>
 
-  <label for="loginSenha">Senha:</label><br>
-  <input type="password" id="loginSenha" name="loginSenha" required><br><br>
+  <label for="senhaLogin">Senha:</label><br>
+  <input type="password" id="senhaLogin" name="senhaLogin" required><br><br>
 
   <input type="submit" value="Entrar">
 </form>
-
-<p>Após criar ou entrar, você será redirecionado para o mural de <a href="Postagens.html">Recadinhos</a>.</p>
 
 <script>
 // 🔗 COLE SUA API AQUI!
 const API_URL = "https://script.google.com/macros/s/AKfycbz1zlMYQggxsOhJr8ZHYyUo2tB2I_hwNk2nfWgZ6OQl9_38aNVpAyJGCJ-lUZHth_mbCA/exec";
 
-// ====== CRIAR CONTA ======
-document.getElementById('formCriar').addEventListener('submit', async (e) => {
+// Criação de conta
+document.getElementById('formCriarConta').addEventListener('submit', async (e) => {
   e.preventDefault();
-  
-  const usuario = document.getElementById('usuario').value.trim();
-  const nome = document.getElementById('nome').value.trim();
-  const senha = document.getElementById('senha').value.trim();
+  const usuario = document.getElementById('usuarioCriar').value.trim();
+  const nome = document.getElementById('nomeCriar').value.trim();
+  const senha = document.getElementById('senhaCriar').value.trim();
 
-  if (!usuario || !nome || !senha) {
-    alert('Por favor, preencha todos os campos!');
-    return;
-  }
+  if (!usuario || !nome || !senha) return alert('Preencha todos os campos!');
 
   try {
-    const resposta = await fetch(API_URL, {
+    const resp = await fetch(API_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'criarConta', usuario, nome, senha }),
+      body: JSON.stringify({ tipo: 'criarConta', usuario, nome, senha })
     });
-
-    const dados = await resposta.json();
+    const dados = await resp.json();
     if (dados.status === 'ok') {
+      alert(dados.mensagem);
       localStorage.setItem('usuario', usuario);
-      alert('Conta criada com sucesso! Bem-vindo(a), ' + nome + '!');
+      localStorage.setItem('nome', nome);
       window.location.href = 'Postagens.html';
     } else {
-      alert('Erro: ' + dados.mensagem);
+      alert(dados.mensagem);
     }
   } catch (erro) {
-    alert('Falha ao conectar ao servidor: ' + erro);
+    alert('Erro ao criar conta: ' + erro);
   }
 });
 
-// ====== LOGIN ======
+// Login
 document.getElementById('formLogin').addEventListener('submit', async (e) => {
   e.preventDefault();
+  const usuario = document.getElementById('usuarioLogin').value.trim();
+  const senha = document.getElementById('senhaLogin').value.trim();
 
-  const usuario = document.getElementById('loginUsuario').value.trim();
-  const senha = document.getElementById('loginSenha').value.trim();
+  if (!usuario || !senha) return alert('Preencha todos os campos!');
 
   try {
-    const resposta = await fetch(API_URL, {
+    const resp = await fetch(API_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'login', usuario, senha }),
+      body: JSON.stringify({ tipo: 'login', usuario, senha })
     });
-
-    const dados = await resposta.json();
+    const dados = await resp.json();
     if (dados.status === 'ok') {
-      localStorage.setItem('usuario', usuario);
-      alert('Bem-vindo(a) de volta, ' + usuario + '!');
+      localStorage.setItem('usuario', dados.usuario);
+      localStorage.setItem('nome', dados.nome);
+      alert('Bem-vindo(a), ' + dados.nome + '!');
       window.location.href = 'Postagens.html';
     } else {
-      alert('Usuário ou senha incorretos.');
+      alert(dados.mensagem);
     }
   } catch (erro) {
     alert('Erro ao conectar: ' + erro);
@@ -117,4 +111,3 @@ document.getElementById('formLogin').addEventListener('submit', async (e) => {
 
 </body>
 </html>
-
