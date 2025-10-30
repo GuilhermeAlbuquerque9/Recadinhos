@@ -14,7 +14,7 @@
     <td>
       [ <a href="index.html">🏠 Início</a> ]
       [ <a href="Sobre.html">📄 Sobre</a> ]
-      [ <a href="Criar_conta.html">🙂 Criar conta</a> ]
+      [ <a href="Criar_conta.html">🙂 Criar conta / Entrar</a> ]
       [ <a href="Postagens.html">📧 Postagens</a> ]
       [ <a href="Sair.html">❌ Sair</a> ]
     </td>
@@ -24,9 +24,6 @@
 <h1>Mural de Recadinhos</h1>
 
 <form id="formRecado">
-  <label for="autor">Usuário:</label><br>
-  <input type="text" id="autor" name="autor" maxlength="20" placeholder="@seunome" required><br><br>
-
   <label for="mensagem">Seu recadinho:</label><br>
   <textarea id="mensagem" name="mensagem" rows="5" cols="40" placeholder="Escreva algo... Você pode mencionar @nomes aqui!" required></textarea><br><br>
 
@@ -40,101 +37,69 @@
 <h2>📩 Recadinhos pra Você</h2>
 <ul id="listaPrivados"></ul>
 
-<footer>
-  <p>© Retropixel™, 2025. Todos os direitos reservados.</p>
-</footer>
-
 <script>
 // 🔗 COLE SUA API AQUI!
 const API_URL = "https://script.google.com/macros/s/AKfycbz1zlMYQggxsOhJr8ZHYyUo2tB2I_hwNk2nfWgZ6OQl9_38aNVpAyJGCJ-lUZHth_mbCA/exec";
 
-// Pega usuário salvo ou deixa em branco
 const usuarioAtual = localStorage.getItem('usuario') || '';
-
-// Referências de elementos
 const form = document.getElementById('formRecado');
 const listaPublicos = document.getElementById('listaPublicos');
 const listaPrivados = document.getElementById('listaPrivados');
 
-// Preenche o campo "Usuário" se estiver logado
-document.getElementById('autor').value = usuarioAtual || '';
-
-// Publicar novo recado
+// Publicar recado
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-
-  const autor = document.getElementById('autor').value.trim();
   const mensagem = document.getElementById('mensagem').value.trim();
-
-  if (!autor || !mensagem) {
-    alert('Por favor, preencha o nome e o recadinho!');
-    return;
-  }
+  if (!mensagem) return alert('Escreva algo!');
 
   try {
-    const resposta = await fetch(API_URL, {
+    const resp = await fetch(API_URL, {
       method: 'POST',
-      body: JSON.stringify({
-        action: 'publicarRecado',
-        autor,
-        mensagem
-      })
+      body: JSON.stringify({ tipo: 'novoRecado', autor: usuarioAtual || 'Anon', mensagem })
     });
-
-    const dados = await resposta.json();
+    const dados = await resp.json();
     if (dados.status === 'ok') {
-      alert('Recadinho publicado com sucesso!');
       form.reset();
-      carregarRecadinhos();
+      carregarRecados();
     } else {
-      alert('Erro: ' + dados.mensagem);
+      alert(dados.mensagem);
     }
   } catch (erro) {
     alert('Erro ao publicar: ' + erro);
   }
 });
 
-// Carregar todos os recadinhos
-async function carregarRecadinhos() {
+// Carregar recados
+async function carregarRecados() {
   try {
-    const resposta = await fetch(API_URL + '?tipo=recadinhos');
-    const dados = await resposta.json();
+    const resp = await fetch(API_URL + '?tipo=recadinhos');
+    const dados = await resp.json();
 
     listaPublicos.innerHTML = '';
     listaPrivados.innerHTML = '';
 
     dados.forEach(r => {
       const li = document.createElement('li');
-      const autor = r.autor;
-      const mensagem = r.mensagem;
+      const mencoes = r.mensagem.match(/@\w+/g);
 
-      // Identifica se há menções
-      const mencoes = mensagem.match(/@\w+/g);
-
-      // Se há menções e o usuário atual está nelas → mostra em "pra você"
       if (mencoes && usuarioAtual && mencoes.some(m => m.toLowerCase() === '@' + usuarioAtual.toLowerCase())) {
-        li.textContent = `@${autor} para você: ${mensagem}`;
+        li.textContent = `@${r.autor} para você: ${r.mensagem}`;
         listaPrivados.appendChild(li);
-      }
-      // Se não há menções → público
-      else if (!mencoes) {
-        li.textContent = `@${autor}: ${mensagem}`;
+      } else if (!mencoes) {
+        li.textContent = `@${r.autor}: ${r.mensagem}`;
         listaPublicos.appendChild(li);
       }
-      // Caso tenha menções, mas não seja pro usuário atual → oculta
+      // Menções para outros usuários ficam ocultas
     });
-
   } catch (erro) {
     alert('Erro ao carregar recadinhos: ' + erro);
   }
 }
 
-// Atualiza o mural automaticamente
-carregarRecadinhos();
-setInterval(carregarRecadinhos, 8000);
+// Atualiza o mural
+carregarRecados();
+setInterval(carregarRecados, 8000);
 </script>
 
 </body>
 </html>
-
-
