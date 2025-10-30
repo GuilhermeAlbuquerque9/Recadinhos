@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <title>Recadinhos™ — Criar conta / Entrar</title>
+  <title>Recadinhos™ — Criar conta ou Entrar</title>
 </head>
 <body>
 
@@ -23,21 +23,20 @@
 
 <h1>Criar conta</h1>
 
-<form id="formConta">
-  <label for="usuario">Usuário:</label><br>
+<form id="formCriar">
+  <label for="usuario">Usuário (sem espaços):</label><br>
   <input type="text" id="usuario" name="usuario" maxlength="20" required><br><br>
 
   <label for="nome">Nome completo:</label><br>
-  <input type="text" id="nome" name="nome" maxlength="40" required><br><br>
+  <input type="text" id="nome" name="nome" maxlength="60" required><br><br>
 
   <label for="senha">Senha:</label><br>
-  <input type="password" id="senha" name="senha" maxlength="20" required><br><br>
+  <input type="password" id="senha" name="senha" required><br><br>
 
-  <input type="submit" value="Criar conta">
-  <input type="reset" value="Limpar">
+  <input type="submit" value="Criar Conta">
 </form>
 
-<hr>
+<br><hr><br>
 
 <h1>Entrar</h1>
 
@@ -46,78 +45,73 @@
   <input type="text" id="loginUsuario" name="loginUsuario" maxlength="20" required><br><br>
 
   <label for="loginSenha">Senha:</label><br>
-  <input type="password" id="loginSenha" name="loginSenha" maxlength="20" required><br><br>
+  <input type="password" id="loginSenha" name="loginSenha" required><br><br>
 
   <input type="submit" value="Entrar">
 </form>
 
-<hr>
-<p>Após criar ou entrar, você será levado ao mural de <a href="Postagens.html">Recadinhos</a>.</p>
+<p>Após criar ou entrar, você será redirecionado para o mural de <a href="Postagens.html">Recadinhos</a>.</p>
 
 <script>
-// API do Google Sheets
+// 🔗 COLE SUA API AQUI!
 const API_URL = "https://script.google.com/macros/s/AKfycbxFfDNxXYIRRE5JXTqro_09yMapNPyosCLKeSfeuN1KfXtK_Ez1XDJBMYwlNmJlNRizYA/exec";
 
-// ===== CRIAR CONTA =====
-document.getElementById('formConta').addEventListener('submit', e => {
+// ====== CRIAR CONTA ======
+document.getElementById('formCriar').addEventListener('submit', async (e) => {
   e.preventDefault();
-
+  
   const usuario = document.getElementById('usuario').value.trim();
   const nome = document.getElementById('nome').value.trim();
   const senha = document.getElementById('senha').value.trim();
 
   if (!usuario || !nome || !senha) {
-    alert('Por favor, preencha todos os campos.');
+    alert('Por favor, preencha todos os campos!');
     return;
   }
 
-  fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      tipo: 'criarConta',
-      usuario,
-      nome,
-      senha
-    })
-  })
-  .then(r => r.json())
-  .then(res => {
-    if(res.status === "ok"){
-      localStorage.setItem('usuarioLogado', usuario);
-      alert(res.mensagem);
+  try {
+    const resposta = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'criarConta', usuario, nome, senha }),
+    });
+
+    const dados = await resposta.json();
+    if (dados.status === 'ok') {
+      localStorage.setItem('usuario', usuario);
+      alert('Conta criada com sucesso! Bem-vindo(a), ' + nome + '!');
       window.location.href = 'Postagens.html';
     } else {
-      alert(res.mensagem);
+      alert('Erro: ' + dados.mensagem);
     }
-  })
-  .catch(() => alert('Erro ao criar conta. Tente novamente.'));
+  } catch (erro) {
+    alert('Falha ao conectar ao servidor: ' + erro);
+  }
 });
 
-// ===== ENTRAR =====
-document.getElementById('formLogin').addEventListener('submit', e => {
+// ====== LOGIN ======
+document.getElementById('formLogin').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const usuario = document.getElementById('loginUsuario').value.trim();
   const senha = document.getElementById('loginSenha').value.trim();
 
-  if (!usuario || !senha) {
-    alert('Por favor, preencha todos os campos.');
-    return;
-  }
+  try {
+    const resposta = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'login', usuario, senha }),
+    });
 
-  fetch(API_URL + "?tipo=contas")
-    .then(r => r.json())
-    .then(contas => {
-      const conta = contas.find(c => c.usuario === usuario && c.senha === senha);
-      if (conta) {
-        localStorage.setItem('usuarioLogado', usuario);
-        alert('Bem-vindo(a) de volta, ' + conta.nome + '!');
-        window.location.href = 'Postagens.html';
-      } else {
-        alert('Usuário ou senha incorretos.');
-      }
-    })
-    .catch(() => alert('Erro ao tentar entrar.'));
+    const dados = await resposta.json();
+    if (dados.status === 'ok') {
+      localStorage.setItem('usuario', usuario);
+      alert('Bem-vindo(a) de volta, ' + usuario + '!');
+      window.location.href = 'Postagens.html';
+    } else {
+      alert('Usuário ou senha incorretos.');
+    }
+  } catch (erro) {
+    alert('Erro ao conectar: ' + erro);
+  }
 });
 </script>
 
