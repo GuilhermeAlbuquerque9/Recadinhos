@@ -1,8 +1,128 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
+<head
   <meta charset="utf-8">
   <title>Recadinhos™</title>
+
+  <style>/* ======== ESTILO FRUTIGER AERO ======== */
+
+/* Fundo branco */
+body {
+    background: #ffffff;
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* Cartões estilo vidro brilhante */
+.aero-card {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(12px);
+    border-radius: 14px;
+    padding: 25px;
+    width: 90%;
+    max-width: 450px;
+    margin: 40px auto;
+    box-shadow:
+        0px 8px 20px rgba(0, 0, 0, 0.15),
+        inset 0px 1px 0px rgba(255, 255, 255, 0.6);
+    position: relative;
+}
+
+/* Brilho superior */
+.aero-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: linear-gradient(
+        rgba(255, 255, 255, 0.7),
+        rgba(255, 255, 255, 0)
+    );
+    border-radius: 14px 14px 0 0;
+}
+
+/* Títulos */
+h1, h2, h3 {
+    text-align: center;
+    font-weight: 600;
+    color: #1a1a1a;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* Inputs estilo translucido */
+input, textarea {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    border-radius: 10px;
+    border: 1px solid #d0d0d0;
+    background: rgba(255, 255, 255, 0.7);
+    transition: 0.2s;
+}
+
+input:focus, textarea:focus {
+    border-color: #64b4ff;
+    box-shadow: 0 0 10px #64b4ff50;
+    outline: none;
+}
+
+/* Botões estilo “Windows Vista / Aero" */
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    background: linear-gradient(#52a8ff, #0077ff);
+    color: white;
+    font-weight: bold;
+    box-shadow:
+        0px 4px 12px rgba(0, 120, 255, 0.4),
+        inset 0px 1px 0px rgba(255, 255, 255, 0.4);
+    transition: 0.2s;
+}
+
+button:hover {
+    background: linear-gradient(#6bbaff, #0088ff);
+}
+
+/* Links */
+a {
+    color: #0077ff;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Caixa de recados (listagem) */
+.recado-box {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 15px;
+    margin: 15px 0;
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.recado-autor {
+    font-weight: bold;
+    color: #0077cc;
+}
+
+.recado-data {
+    font-size: 12px;
+    opacity: 0.6;
+}
+</style>
 </head>
 <body>
 
@@ -44,3 +164,4 @@
 
 </body>
 </html>
+
