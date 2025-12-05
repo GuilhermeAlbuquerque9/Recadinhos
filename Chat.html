@@ -3,70 +3,201 @@
 <head>
   <meta charset="UTF-8">
   <title>Recadinhos™ — Chat</title>
+  <style>
+    body { font-family: Arial; }
+    #areaMensagens div {
+      margin-bottom: 8px;
+      padding: 6px;
+      border-radius: 5px;
+    }
+    .me { background: #d9ffd9; }
+    .ele { background: #e8e8ff; }
+  </style>
 </head>
 <body>
 
-  <h1><strong>Recadinhos™</strong></h1>
+<table>
+  <tr>
+    <h1><strong>Recadinhos™</strong></h1>
+  </tr>
+  <tr>
+    <td>
+      [ <a href="index.html">🏠 Início</a> ]
+      [ <a href="Sobre.html">📄 Sobre</a> ]
+      [ <a href="Criar_conta.html">🙂 Criar conta / Entrar</a> ]
+      [ <a href="Postagens.html">📧 Postagens</a> ]
+      [ <a href="Chat.html">💬 Chat</a> ]
+      [ <a href="Sair.html">❌ Sair</a> ]
+    </td>
+  </tr>
+</table>
 
-  <table>
-    <tr>
-      <td>
-        [ <a href="index.html">🏠 Início</a> ]
-        [ <a href="Sobre.html">📄 Sobre</a> ]
-        [ <a href="Criar_conta.html">🙂 Criar conta / Entrar</a> ]
-        [ <a href="Postagens.html">📧 Postagens</a> ]
-        [ <a href="Chat.html">💬 Chat</a> ]
-        [ <a href="Sair.html">❌ Sair</a> ]
-      </td>
-    </tr>
-  </table>
+<h1>💬 Chat Privado</h1>
+<p>Logado como: <span id="usuarioAtual"></span></p>
 
-  <hr>
+<table border="1" width="100%">
+  <tr>
+    <!-- Barra lateral -->
+    <td width="30%" valign="top">
+      <h3>Contatos</h3>
+      <button onclick="abrirAdicionarContato()">➕ Adicionar</button>
+      <div id="listaContatos"></div>
+    </td>
 
-  <h2>💬 Chat Privado</h2>
-  <p>Logado como: <span id="usuarioAtual"></span></p>
+    <!-- Área de chat -->
+    <td width="70%" valign="top">
+      <h3 id="tituloChat">Nenhum chat selecionado</h3>
 
-  <table border="1" width="100%" cellspacing="0" cellpadding="5">
-    <tr>
-      <!-- Barra lateral -->
-      <td width="30%" valign="top">
-        <h3>Contatos</h3>
-        <button onclick="abrirAdicionarContato()">➕ Adicionar</button>
+      <div id="statusUsuario"></div>
+      <div id="digitando"></div>
 
-        <div id="listaContatos" style="margin-top:10px;"></div>
-      </td>
+      <div id="areaMensagens" style="height:300px; overflow-y:scroll; border:1px solid #000; padding:5px;"></div>
 
-      <!-- Área do chat -->
-      <td width="70%" valign="top">
-        <h3 id="tituloChat">Nenhum chat selecionado</h3>
+      <br>
 
-        <div id="statusUsuario" style="font-weight:bold; color:green;"></div>
-        <div id="digitando" style="color:gray;"></div>
+      <textarea id="msg" rows="3" cols="50" disabled oninput="avisarDigitando()"></textarea><br>
+      <button id="btnEnviar" disabled onclick="enviarMensagem()">Enviar</button>
+      <button id="btnChamar" disabled onclick="chamarUsuario()">📢 Chamar</button>
+    </td>
+  </tr>
+</table>
 
-        <div id="areaMensagens"
-          style="height:300px; overflow-y:scroll; border:1px solid #000; padding:5px; background:#f9f9f9;">
-        </div>
+<!-- Pop-up -->
+<div id="popupAdicionar" style="display:none; border:1px solid #000; padding:10px; width:250px; background:#fff;">
+  <h3>Adicionar contato</h3>
+  <input type="text" id="novoContato" placeholder="@usuario"><br><br>
+  <button onclick="confirmarAdicionarContato()">Adicionar</button>
+  <button onclick="fecharAdicionarContato()">Cancelar</button>
+</div>
 
-        <br>
+<script>
 
-        <textarea id="msg" rows="3" cols="60" disabled></textarea><br><br>
+// --------------------------------------
+// CARREGAR USUÁRIO
+// --------------------------------------
+let usuario = localStorage.getItem("usuario");
+document.getElementById("usuarioAtual").innerText = usuario;
 
-        <button id="btnEnviar" disabled onclick="enviarMensagem()">Enviar</button>
-        <button id="btnChamar" disabled onclick="chamarUsuario()">📢 Chamar</button>
-      </td>
-    </tr>
-  </table>
+// CONTATO ATUAL DO CHAT
+let conversandoCom = null;
 
-  <!-- Pop-up de adicionar contato -->
-  <div id="popupAdicionar"
-       style="display:none; padding:10px; width:250px; background:#fff;">
-    <h3>Adicionar contato</h3>
-    <input type="text" id="novoContato" placeholder="@usuario"><br><br>
-    <button onclick="confirmarAdicionarContato()">Adicionar</button>
-    <button onclick="fecharAdicionarContato()">Cancelar</button>
-  </div>
+// --------------------------------------
+// LISTAR CONTATOS
+// --------------------------------------
+function carregarContatos() {
+  google.script.run
+    .withSuccessHandler(contatos => {
+      let html = "";
+      contatos.forEach(c => {
+        if (c.usuario !== usuario) {
+          html += `<div>
+            <button onclick="abrirChat('${c.usuario}')">@${c.usuario}</button>
+          </div>`;
+        }
+      });
+      document.getElementById("listaContatos").innerHTML = html;
+    })
+    .listarContas();
+}
 
-  <script src="chat.js"></script>
+// --------------------------------------
+// ABRIR CHAT
+// --------------------------------------
+function abrirChat(destinatario) {
+  conversandoCom = destinatario;
+  document.getElementById("tituloChat").innerText = "Conversando com @" + destinatario;
+
+  document.getElementById("msg").disabled = false;
+  document.getElementById("btnEnviar").disabled = false;
+  document.getElementById("btnChamar").disabled = false;
+
+  carregarMensagens();
+}
+
+// --------------------------------------
+// CARREGAR MENSAGENS A CADA 2s
+// --------------------------------------
+setInterval(() => {
+  if (conversandoCom) carregarMensagens();
+}, 2000);
+
+function carregarMensagens() {
+  google.script.run
+    .withSuccessHandler(msgs => {
+      const div = document.getElementById("areaMensagens");
+      div.innerHTML = "";
+
+      msgs.forEach(m => {
+        const classe = m.remetente === usuario ? "me" : "ele";
+        div.innerHTML += `<div class="${classe}">
+          <strong>@${m.remetente}</strong><br>${m.mensagem}<br>
+          <small>${m.data}</small>
+        </div>`;
+      });
+
+      div.scrollTop = div.scrollHeight;
+    })
+    .listarMensagens(usuario, conversandoCom);
+}
+
+// --------------------------------------
+// ENVIAR MENSAGEM
+// --------------------------------------
+function enviarMensagem() {
+  const txt = document.getElementById("msg").value.trim();
+  if (!txt) return;
+
+  google.script.run.enviarMensagemPrivada(usuario, conversandoCom, txt);
+
+  document.getElementById("msg").value = "";
+  carregarMensagens();
+}
+
+// --------------------------------------
+// "CHAMAR" — NOTIFICAÇÃO SKYPE
+// --------------------------------------
+function chamarUsuario() {
+  google.script.run.enviarChamada(usuario, conversandoCom);
+  alert("📢 Chamado enviado!");
+}
+
+// --------------------------------------
+// ADICIONAR CONTATO
+// --------------------------------------
+function abrirAdicionarContato() {
+  document.getElementById("popupAdicionar").style.display = "block";
+}
+
+function fecharAdicionarContato() {
+  document.getElementById("popupAdicionar").style.display = "none";
+}
+
+function confirmarAdicionarContato() {
+  let novo = document.getElementById("novoContato").value.replace("@", "");
+  if (!novo) return;
+
+  alert("Contato adicionado! (fake por enquanto)");
+
+  fecharAdicionarContato();
+}
+
+// --------------------------------------
+// DIGITANDO...
+// --------------------------------------
+let timeoutDigitando;
+
+function avisarDigitando() {
+  clearTimeout(timeoutDigitando);
+  google.script.run.setDigitando(usuario, conversandoCom);
+
+  timeoutDigitando = setTimeout(() => {
+    google.script.run.setParouDigitando(usuario, conversandoCom);
+  }, 1500);
+}
+
+</script>
+
 </body>
 </html>
+
 
