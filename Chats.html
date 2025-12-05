@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Recadinhos™ — Chat</title>
+</head>
+<body>
+
+<h1>💬 Chat Privado</h1>
+<p>Logado como: <span id="usuarioAtual"></span></p>
+
+<table border="1" width="100%">
+  <tr>
+    <!-- Barra lateral -->
+    <td width="30%" valign="top">
+      <h3>Contatos</h3>
+      <button onclick="abrirAdicionarContato()">➕ Adicionar</button>
+
+      <div id="listaContatos"></div>
+    </td>
+
+    <!-- Área de chat -->
+    <td width="70%" valign="top">
+      <h3 id="tituloChat">Nenhum chat selecionado</h3>
+
+      <div id="statusUsuario"></div>
+      <div id="digitando"></div>
+
+      <div id="areaMensagens" style="height:300px; overflow-y:scroll; border:1px solid #000; padding:5px;">
+      </div>
+
+      <br>
+
+      <textarea id="msg" rows="3" cols="50" disabled></textarea><br>
+      <button id="btnEnviar" disabled onclick="enviarMensagem()">Enviar</button>
+      <button id="btnChamar" disabled onclick="chamarUsuario()">📢 Chamar</button>
+    </td>
+  </tr>
+</table>
+
+<!-- Pop-up adicionar contato -->
+<div id="popupAdicionar" style="display:none; border:1px solid #000; padding:10px; width:250px; background:#fff;">
+  <h3>Adicionar contato</h3>
+  <input type="text" id="novoContato" placeholder="@usuario"><br><br>
+  <button onclick="confirmarAdicionarContato()">Adicionar</button>
+  <button onclick="fecharAdicionarContato()">Cancelar</button>
+</div>
+
+<script src="chat.js"></script>
+</body>
+</html>
