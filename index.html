@@ -51,8 +51,37 @@
   <p>© Retropixel™, 2025. Todos os direitos reservados.</p>
 </footer>
 
+  <script>
+  const API = "https://script.google.com/macros/s/AKfycbz1zlMYQggxsOhJr8ZHYyUo2tB2I_hwNk2nfWgZ6OQl9_38aNVpAyJGCJ-lUZHth_mbCA/exec";
+
+  function carregarNotificacoes() {
+    const usuario = localStorage.getItem("usuario");
+
+    if (!usuario) return;
+
+    fetch(API + "?tipo=chatNotificacoes&usuario=" + usuario)
+      .then(r => r.json())
+      .then(n => {
+        const div = document.getElementById("notificacoes");
+
+        if (!n || n.length === 0) {
+          div.innerHTML = "<i>Nenhuma notificação.</i>";
+          return;
+        }
+
+        div.innerHTML = "";
+        n.forEach(item => {
+          div.innerHTML += "<p>📩 Nova mensagem de <b>@" + item.remetente + "</b></p>";
+        });
+      });
+  }
+
+  carregarNotificacoes();
+</script>
+
 </body>
 </html>
+
 
 
 
