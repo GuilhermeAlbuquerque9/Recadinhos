@@ -1,7 +1,7 @@
 // ================================================
 // CONFIGURAÇÃO
 // ================================================
-const API = "https://script.google.com/macros/s/AKfycbxPhwWbR9C_9yjFJhyVZs7Hc18vLBNAg1isDgK17o7EizXkzK1SC5IJylu4KJPAeW9NtA/exec"; // <-- coloque sua URL do Apps Script publicado
+const API = "https://script.google.com/macros/s/AKfycbymTI7GrsOwifJQGlfa9EA99HldnVDBSMYjFcRCU3P9n1N80Q1oPRRQzi4XHizPdDIokw/exec"; // <-- coloque sua URL do Apps Script publicado
 
 let usuarioLogado = localStorage.getItem("usuario");
 let contatoAtual = null;
