@@ -4,124 +4,128 @@
   <meta charset="utf-8">
   <title>Recadinhos™</title>
 
-  <style>/* ======== ESTILO FRUTIGER AERO ======== */
+  <style>/* ======== FRUTIGER AERO REAL ======== */
 
-/* Fundo branco */
+/* Fundo branco básico */
 body {
     background: #ffffff;
     margin: 0;
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
 }
 
-/* Cartões estilo vidro brilhante */
-.aero-card {
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(12px);
-    border-radius: 14px;
+/* CAIXA COM GRADIENTE AERO (verde → azul → aqua) */
+.aero-box {
+    margin: 40px auto;
     padding: 25px;
     width: 90%;
-    max-width: 450px;
-    margin: 40px auto;
+    max-width: 500px;
+
+    background: linear-gradient(
+        135deg,
+        #9ee7ff 0%,
+        #6ed4ff 20%,
+        #85f7b4 55%,
+        #f6ff8f 100%
+    );
+    border-radius: 18px;
+
+    border: 2px solid rgba(0, 120, 255, 0.35);
+
     box-shadow:
-        0px 8px 20px rgba(0, 0, 0, 0.15),
-        inset 0px 1px 0px rgba(255, 255, 255, 0.6);
+        0 8px 20px rgba(0, 0, 0, 0.25),
+        inset 0 0 12px rgba(255, 255, 255, 0.6);
     position: relative;
 }
 
-/* Brilho superior */
-.aero-card::before {
+/* Reflexo curvo */
+.aero-box::before {
     content: "";
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 60px;
-    background: linear-gradient(
+    height: 50%;
+    background: radial-gradient(
+        circle at top left,
         rgba(255, 255, 255, 0.7),
-        rgba(255, 255, 255, 0)
+        rgba(255, 255, 255, 0.05) 70%
     );
-    border-radius: 14px 14px 0 0;
+    border-radius: 18px 18px 0 0;
 }
 
-/* Títulos */
-h1, h2, h3 {
+/* TÍTULOS */
+h1, h2 {
     text-align: center;
-    font-weight: 600;
-    color: #1a1a1a;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+    font-weight: 700;
+    color: #003366;
+    text-shadow: 0 1px 0 white;
 }
 
-/* Inputs estilo translucido */
+/* INPUTS ESTILO AERO */
 input, textarea {
     width: 100%;
     padding: 12px;
-    margin-top: 8px;
-    border-radius: 10px;
-    border: 1px solid #d0d0d0;
-    background: rgba(255, 255, 255, 0.7);
-    transition: 0.2s;
+    margin: 10px 0;
+    border-radius: 12px;
+
+    background: linear-gradient(#ffffff, #e9f7ff);
+    border: 2px solid #7ccaff;
+
+    box-shadow:
+        inset 0 1px 3px rgba(0, 0, 0, 0.2),
+        0 0 6px rgba(0, 150, 255, 0.25);
 }
 
 input:focus, textarea:focus {
-    border-color: #64b4ff;
-    box-shadow: 0 0 10px #64b4ff50;
+    border-color: #0094ff;
+    box-shadow:
+        inset 0 0 5px rgba(0, 140, 255, 0.5),
+        0 0 8px rgba(0, 160, 255, 0.6);
     outline: none;
 }
 
-/* Botões estilo “Windows Vista / Aero" */
+/* BOTÃO AERO (BRILHO REDONDO) */
 button {
     width: 100%;
     padding: 12px;
-    margin-top: 14px;
+    margin-top: 12px;
     border: none;
-    border-radius: 12px;
-    font-size: 16px;
-    cursor: pointer;
-    background: linear-gradient(#52a8ff, #0077ff);
+    border-radius: 14px;
+
+    background: linear-gradient(#6ecbff, #0094ff);
     color: white;
+    font-size: 16px;
     font-weight: bold;
+
     box-shadow:
-        0px 4px 12px rgba(0, 120, 255, 0.4),
-        inset 0px 1px 0px rgba(255, 255, 255, 0.4);
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        0 6px 16px rgba(0, 120, 255, 0.4);
+
+    position: relative;
+    cursor: pointer;
     transition: 0.2s;
 }
 
+/* brilho circular dentro do botão */
+button::after {
+    content: "";
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: 60%;
+    height: 40%;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.9),
+        rgba(255, 255, 255, 0) 70%
+    );
+}
+
 button:hover {
-    background: linear-gradient(#6bbaff, #0088ff);
-}
-
-/* Links */
-a {
-    color: #0077ff;
-    font-weight: bold;
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-/* Caixa de recados (listagem) */
-.recado-box {
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    padding: 15px;
-    margin: 15px 0;
-    box-shadow:
-        0 4px 12px rgba(0, 0, 0, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
-.recado-autor {
-    font-weight: bold;
-    color: #0077cc;
-}
-
-.recado-data {
-    font-size: 12px;
-    opacity: 0.6;
-}
+    background: linear
 </style>
 </head>
 <body>
