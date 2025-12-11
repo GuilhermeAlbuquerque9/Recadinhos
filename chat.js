@@ -2,7 +2,7 @@
 // Chat.js — Recadinhos™ 3.0
 // ==============================
 
-const API_URL = "🔗 COLE SUA API AQUI!"; // Coloque aqui sua API do Apps Script
+const API_URL = "https://script.google.com/macros/s/AKfycbx0Z1sH7sn_aKOM-0f1bb7rOU6pmi4qUvFx_QceT7mVRRRsquPbBgVOl7r1_bvsk-q0nQ/exec"; // Coloque aqui sua API do Apps Script
 let usuarioAtual = sessionStorage.getItem("usuario") || "";
 let contatoSelecionado = null;
 
