@@ -12,13 +12,6 @@ let bloqueados = []; // local only
 // INICIALIZAÇÃO
 // =======================================================
 
-window.onload = () => {
-  if (!usuarioAtual) {
-    alert("Você precisa fazer login!");
-    location.href = "Criar_conta.html";
-    return;
-  }
-
   document.getElementById("usuarioAtual").innerText = usuarioAtual;
 
   carregarContatos();
