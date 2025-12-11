@@ -1,52 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <title>Recadinhos™ — Chat Privado</title>
 </head>
 <body>
+  <header>
+    <h1>Recadinhos™</h1>
+  </header>
 
-<header>Recadinhos™ — Chat Privado</header>
+  <nav>
+    <a href="index.html">🏠 Início</a>
+    <a href="Sobre.html">📄 Sobre</a>
+    <a href="Criar_conta.html">🙂 Criar conta / Entrar</a>
+    <a href="Postagens.html">📧 Postagens</a>
+    <a href="Chat.html">💬 Chat</a>
+    <a href="Sair.html">❌ Sair</a>
+  </nav>
 
-<nav>
-  <a href="index.html">🏠 Início</a>
-  <a href="Sobre.html">📄 Sobre</a>
-  <a href="Criar_conta.html">🙂 Criar conta / Entrar</a>
-  <a href="Postagens.html">📧 Postagens</a>
-  <a href="Chat.html">💬 Chat</a>
-  <a href="Sair.html">❌ Sair</a>
-</nav>
+  <main>
+    <p>Logado como: <span id="usuarioAtual"></span></p>
 
-<div id="container">
-  <!-- Barra lateral -->
-  <div id="sidebar">
-    <h3>Contatos</h3>
-    <button onclick="abrirAdicionarContato()">➕ Adicionar</button>
-    <div id="listaContatos"></div>
-  </div>
+    <table width="100%" border="0">
+      <tr>
+        <!-- Barra lateral -->
+        <td width="30%" valign="top">
+          <h3>Contatos</h3>
+          <button onclick="abrirAdicionarContato()">➕ Adicionar</button>
+          <div id="listaContatos"></div>
+        </td>
 
-  <!-- Área de chat -->
-  <div id="chatArea">
-    <h3 id="tituloChat">Nenhum chat selecionado</h3>
-    <div id="statusUsuario"></div>
-    <div id="digitando"></div>
+        <!-- Área de chat -->
+        <td width="70%" valign="top">
+          <h3 id="tituloChat">Nenhum chat selecionado</h3>
+          <div id="statusUsuario"></div>
+          <div id="areaMensagens"></div>
+          <br>
+          <textarea id="msg" rows="3" cols="50" disabled></textarea><br>
+          <button id="btnEnviar" disabled onclick="enviarMensagem()">Enviar</button>
+          <button id="btnChamar" disabled onclick="chamarUsuario()">📢 Chamar</button>
+        </td>
+      </tr>
+    </table>
 
-    <div id="areaMensagens"></div>
+    <!-- Pop-up adicionar contato -->
+    <div id="popupAdicionar">
+      <h3>Adicionar contato</h3>
+      <input type="text" id="novoContato" placeholder="@usuario"><br><br>
+      <button onclick="confirmarAdicionarContato()">Adicionar</button>
+      <button onclick="fecharAdicionarContato()">Cancelar</button>
+    </div>
+  </main>
 
-    <textarea id="msg" rows="3" placeholder="Digite sua mensagem..." disabled></textarea>
-    <button id="btnEnviar" disabled onclick="enviarMensagem()">Enviar</button>
-    <button id="btnChamar" disabled onclick="chamarUsuario()">📢 Chamar</button>
-  </div>
-</div>
-
-<!-- Pop-up adicionar contato -->
-<div id="popupAdicionar">
-  <h3>Adicionar contato</h3>
-  <input type="text" id="novoContato" placeholder="@usuario"><br><br>
-  <button onclick="confirmarAdicionarContato()">Adicionar</button>
-  <button onclick="fecharAdicionarContato()">Cancelar</button>
-</div>
-
-<script src="chat.js"></script>
+  <script src="chat.js"></script>
 </body>
 </html>
