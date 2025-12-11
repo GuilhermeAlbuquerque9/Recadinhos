@@ -6,106 +6,89 @@
 </head>
 <body>
 
-<!-- ==============================================
-        TOPO DO SITE
-================================================= -->
-<table width="100%" border="0">
-  <tr>
-    <td><h1><strong>Recadinhos™</strong></h1></td>
-  </tr>
+<!-- TOPO -->
+<table>
+  <tr><h1><strong>Recadinhos™</strong></h1></tr>
   <tr>
     <td>
-      [ <a href="index.html">[🏠 Início]</a> ]
-      [ <a href="Sobre.html">[📄 Sobre]</a> ]
-      [ <a href="Criar_conta.html">[🙂 Criar conta / Entrar]</a> ]
-      [ <a href="Postagens.html">[📧 Postagens]</a> ]
-      [ <a href="Chat.html">[💬 Chat]</a> ]
-      [ <a href="Sair.html">[❌ Sair]</a> ]
+      [ <a href="index.html">🏠 Início</a> ]
+      [ <a href="Sobre.html">📄 Sobre</a> ]
+      [ <a href="Criar_conta.html">🙂 Criar conta / Entrar</a> ]
+      [ <a href="Postagens.html">📧 Postagens</a> ]
+      [ <a href="Chat.html">💬 Chat</a> ]
+      [ <a href="Sair.html">❌ Sair</a> ]
     </td>
   </tr>
 </table>
 
-<hr>
+<h1>💬 Chat Privado</h1>
+<p>Logado como: <span id="usuarioAtual"></span></p>
 
-<h2>💬 Chat Privado</h2>
-<p>Logado como: <span id="usuarioAtual">(carregando...)</span></p>
-
-<hr>
-
-
-<!-- ==============================================
-        LAYOUT PRINCIPAL DO CHAT
-================================================= -->
-<table width="100%" border="1" cellspacing="0" cellpadding="10">
+<!-- LAYOUT PRINCIPAL -->
+<table border="1" width="100%">
   <tr>
 
-    <!-- ====== BARRA LATERAL ====== -->
+    <!-- CONTATOS -->
     <td width="30%" valign="top">
-
-      <h3>👥 Contatos</h3>
+      <h3>Contatos</h3>
 
       <button onclick="abrirAdicionarContato()">➕ Adicionar contato</button>
 
       <hr>
 
-      <div id="listaContatos">
-        (carregando contatos...)
-      </div>
-
+      <div id="listaContatos"></div>
     </td>
 
-    <!-- ====== ÁREA DO CHAT ====== -->
+    <!-- CHAT -->
     <td width="70%" valign="top">
 
       <h3 id="tituloChat">Nenhum chat selecionado</h3>
 
-      <div id="statusUsuario" style="font-size:14px; margin-bottom:5px;"></div>
-      <div id="digitando" style="font-size:13px; color:gray;"></div>
+      <!-- Status -->
+      <div id="statusUsuario"></div>
+      <div id="digitando"></div>
 
-      <!-- MENU DE 3 PONTOS -->
-      <button id="menuBtn" onclick="abrirMenu()" style="float:right; display:none;">⋮</button>
-
-      <div id="menuOpcoes" 
-           style="display:none; position:absolute; background:white; border:1px solid black; padding:10px;">
-        <div onclick="limparConversa()" style="cursor:pointer;">❌ Limpar conversa</div>
-        <div onclick="apagarContato()" style="cursor:pointer;">🗑 Apagar contato</div>
-        <div onclick="bloquearContato()" style="cursor:pointer;">🚫 Bloquear contato</div>
-        <div onclick="chamarUsuario()" style="cursor:pointer;">📢 Chamar</div>
-      </div>
-
-      <hr>
-
-      <div id="areaMensagens" 
+      <!-- ÁREA DE MENSAGENS -->
+      <div id="areaMensagens"
            style="height:300px; overflow-y:scroll; border:1px solid #000; padding:5px;">
       </div>
 
-      <hr>
+      <br>
 
+      <!-- CAMPO DE TEXTO -->
       <textarea id="msg" rows="3" cols="50" disabled></textarea><br>
 
       <button id="btnEnviar" disabled onclick="enviarMensagem()">Enviar</button>
       <button id="btnChamar" disabled onclick="chamarUsuario()">📢 Chamar</button>
 
+      <!-- MENU DE 3 PONTINHOS -->
+      <button onclick="toggleMenu()" id="menuBtn">⋮</button>
+
+      <div id="menuOpcoes"
+           style="display:none; border:1px solid #000; width:200px; background:#fff; padding:10px; margin-top:10px;">
+
+        <button onclick="limparConversa()">❌ Limpar conversa</button><br><br>
+        <button onclick="apagarContato()">🗑 Apagar contato</button><br><br>
+        <button onclick="bloquearContato()">🚫 Bloquear contato</button><br><br>
+        <button onclick="chamarUsuario()">📢 Chamar</button>
+
+      </div>
+
     </td>
+
   </tr>
 </table>
 
-
-<!-- ==============================================
-        POPUP ADICIONAR CONTATO
-================================================= -->
-<div id="popupAdicionar" 
-     style="display:none; border:1px solid #000; padding:15px; width:250px; background:white; position:absolute; top:100px; left:100px;">
+<!-- POP-UP ADICIONAR CONTATO -->
+<div id="popupAdicionar"
+     style="display:none; border:1px solid #000; padding:10px; width:250px; background:#fff; position:absolute; top:100px; left:100px;">
   <h3>Adicionar contato</h3>
-
   <input type="text" id="novoContato" placeholder="@usuario"><br><br>
-
   <button onclick="confirmarAdicionarContato()">Adicionar</button>
   <button onclick="fecharAdicionarContato()">Cancelar</button>
 </div>
 
 
 <script src="chat.js"></script>
-
 </body>
 </html>
