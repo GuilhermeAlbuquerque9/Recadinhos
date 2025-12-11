@@ -1,294 +1,270 @@
-// ===========================================================
-// CONFIGURAÇÕES
-// ===========================================================
+// =======================================================
+// CONFIGURAÇÃO
+// =======================================================
 
-const API = "SEU_WEBAPP_URL_AQUI"; // coloque sua URL do WebApp!
-let usuarioAtual = localStorage.getItem("usuario") || "";
+const API = "https://script.google.com/macros/s/AKfycbzjhD_JXXA-Z37IUtmPTMT9674-AlvMEDwguq7Ua3N7bLjpd2SftfGlaQPZ7hqaB2iXMA/exec"; // <- coloque sua URL aqui
+
+let usuarioAtual = localStorage.getItem("usuarioLogado");
 let contatoAtual = null;
-let intervaloStatus;
-let intervaloMensagens;
-let timeoutDigitando = null;
+let bloqueados = []; // local only
 
-
-// ===========================================================
+// =======================================================
 // INICIALIZAÇÃO
-// ===========================================================
+// =======================================================
 
-window.onload = function () {
-    if (!usuarioAtual) {
-        alert("Você não está logado!");
-        window.location.href = "Criar_conta.html";
-        return;
-    }
+window.onload = () => {
+  if (!usuarioAtual) {
+    alert("Você precisa fazer login!");
+    location.href = "Criar_conta.html";
+    return;
+  }
 
-    document.getElementById("usuarioAtual").innerText = "@" + usuarioAtual;
+  document.getElementById("usuarioAtual").innerText = usuarioAtual;
 
-    carregarContatos();
+  carregarContatos();
+  setInterval(() => {
+    if (contatoAtual) carregarMensagens();
+    if (contatoAtual) atualizarStatusContato();
+  }, 2000);
 };
 
-
-
-// ===========================================================
-// LISTAR CONTATOS
-// ===========================================================
+// =======================================================
+// 🟦 BUSCAR CONTATOS
+// =======================================================
 
 function carregarContatos() {
-    fetch(`${API}?tipo=contatos&usuario=${usuarioAtual}`)
-        .then(r => r.json())
-        .then(contatos => {
-            const lista = document.getElementById("listaContatos");
-            lista.innerHTML = "";
+  fetch(`${API}?tipo=contatos&usuario=${usuarioAtual}`)
+    .then(r => r.json())
+    .then(lista => {
+      const box = document.getElementById("listaContatos");
+      box.innerHTML = "";
 
-            if (contatos.length === 0) {
-                lista.innerHTML = "<p>Nenhum contato adicionado.</p>";
-                return;
-            }
-
-            contatos.forEach(c => {
-                const div = document.createElement("div");
-                div.className = "contato-item";
-                div.innerHTML = `
-                    <button onclick="abrirChat('${c}')">@${c}</button>
-                    <hr>
-                `;
-                lista.appendChild(div);
-            });
-        });
+      lista.forEach(cont => {
+        const div = document.createElement("div");
+        div.style = "padding:10px; border-bottom:1px solid #ccc; cursor:pointer";
+        div.innerText = cont;
+        div.onclick = () => abrirChat(cont);
+        box.appendChild(div);
+      });
+    });
 }
 
-
-
-// ===========================================================
-// ADICIONAR CONTATO
-// ===========================================================
+// =======================================================
+// 🟩 ADICIONAR CONTATO
+// =======================================================
 
 function abrirAdicionarContato() {
-    document.getElementById("popupAdicionar").style.display = "block";
+  document.getElementById("popupAdicionar").style.display = "block";
 }
 
 function fecharAdicionarContato() {
-    document.getElementById("popupAdicionar").style.display = "none";
+  document.getElementById("popupAdicionar").style.display = "none";
 }
 
 function confirmarAdicionarContato() {
-    const contato = document.getElementById("novoContato").value.replace("@", "");
-    if (!contato) return alert("Digite um usuário!");
+  const contato = document.getElementById("novoContato").value.replace("@", "");
 
-    fetch(API, {
-        method: "POST",
-        body: JSON.stringify({
-            tipo: "adicionarContato",
-            usuario: usuarioAtual,
-            contato: contato
-        })
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({
+      tipo: "adicionarContato",
+      usuario: usuarioAtual,
+      contato
     })
-        .then(r => r.json())
-        .then(res => {
-            alert(res.mensagem);
-            if (res.status === "ok") {
-                carregarContatos();
-                fecharAdicionarContato();
-            }
-        });
+  })
+    .then(r => r.json())
+    .then(res => {
+      alert(res.mensagem);
+      if (res.status === "ok") {
+        fecharAdicionarContato();
+        carregarContatos();
+      }
+    });
 }
 
-
-
-// ===========================================================
-// ABRIR CHAT
-// ===========================================================
+// =======================================================
+// 🟨 ABRIR CHAT
+// =======================================================
 
 function abrirChat(contato) {
-    contatoAtual = contato;
+  contatoAtual = contato;
+  document.getElementById("tituloChat").innerText = `Chat com @${contato}`;
+  document.getElementById("msg").disabled = false;
+  document.getElementById("btnEnviar").disabled = false;
+  document.getElementById("btnChamar").disabled = false;
 
-    document.getElementById("tituloChat").innerText = `Chat com @${contato}`;
-    document.getElementById("msg").disabled = false;
-    document.getElementById("btnEnviar").disabled = false;
-    document.getElementById("btnChamar").disabled = false;
-
-    carregarStatusContato();
-    carregarMensagens();
-
-    clearInterval(intervaloStatus);
-    clearInterval(intervaloMensagens);
-
-    intervaloStatus = setInterval(carregarStatusContato, 2000);
-    intervaloMensagens = setInterval(carregarMensagens, 2000);
-
-    atualizarDigitando(false);
+  carregarMensagens();
+  atualizarStatusContato();
 }
 
-
-
-// ===========================================================
-// STATUS DO CONTATO
-// ===========================================================
-
-function carregarStatusContato() {
-    fetch(`${API}?tipo=status&usuario=${contatoAtual}`)
-        .then(r => r.json())
-        .then(s => {
-            const status = document.getElementById("statusUsuario");
-
-            if (s.status === "digitando") {
-                status.innerHTML = "💬 Digitando...";
-            } else if (s.status === "online") {
-                status.innerHTML = "🟢 Online";
-            } else {
-                status.innerHTML = "🔴 Offline";
-            }
-        });
-}
-
-
-
-// ===========================================================
-// DIGITANDO...
-// ===========================================================
-
-document.getElementById("msg").addEventListener("input", function () {
-    atualizarDigitando(true);
-
-    clearTimeout(timeoutDigitando);
-    timeoutDigitando = setTimeout(() => atualizarDigitando(false), 1500);
-});
-
-function atualizarDigitando(sim) {
-    fetch(API, {
-        method: "POST",
-        body: JSON.stringify({
-            tipo: "status",
-            usuario: usuarioAtual,
-            status: sim ? "digitando" : "online"
-        })
-    });
-}
-
-
-
-// ===========================================================
-// CARREGAR MENSAGENS
-// ===========================================================
+// =======================================================
+// 🟧 LER MENSAGENS
+// =======================================================
 
 function carregarMensagens() {
-    if (!contatoAtual) return;
+  fetch(`${API}?tipo=chat&user1=${usuarioAtual}&user2=${contatoAtual}`)
+    .then(r => r.json())
+    .then(msgs => {
+      const area = document.getElementById("areaMensagens");
+      area.innerHTML = "";
 
-    fetch(`${API}?tipo=chat&user1=${usuarioAtual}&user2=${contatoAtual}`)
-        .then(r => r.json())
-        .then(msgs => {
-            const box = document.getElementById("areaMensagens");
-            box.innerHTML = "";
+      msgs.forEach(linha => {
+        const div = document.createElement("div");
+        div.style = "margin-bottom:10px; padding:8px; border-radius:6px;";
 
-            msgs.forEach(m => {
-                const div = document.createElement("div");
-                div.className = "msg";
+        if (linha.remetente === usuarioAtual) {
+          div.style.background = "#d0ffd0";
+          div.innerHTML = `<strong>Você:</strong> ${linha.mensagem}<br><small>${linha.data}</small>`;
+        } else {
+          div.style.background = "#d0e0ff";
+          div.innerHTML = `<strong>@${linha.remetente}:</strong> ${linha.mensagem}<br><small>${linha.data}</small>`;
+        }
 
-                const lado = m.remetente === usuarioAtual ? "direita" : "esquerda";
+        area.appendChild(div);
+      });
 
-                div.innerHTML = `
-                    <div class="bubble ${lado}">
-                        <strong>@${m.remetente}</strong><br>
-                        ${m.mensagem}<br>
-                        <span class="hora">${m.data}</span>
-                    </div>
-                `;
-
-                box.appendChild(div);
-            });
-
-            box.scrollTop = box.scrollHeight;
-        });
+      area.scrollTop = area.scrollHeight;
+    });
 }
 
-
-
-// ===========================================================
-// ENVIAR MENSAGEM
-// ===========================================================
+// =======================================================
+// 🟥 ENVIAR MENSAGEM
+// =======================================================
 
 function enviarMensagem() {
-    const txt = document.getElementById("msg");
-    if (!txt.value.trim()) return;
+  const texto = document.getElementById("msg").value.trim();
+  if (!texto) return;
 
-    fetch(API, {
-        method: "POST",
-        body: JSON.stringify({
-            tipo: "enviarMensagem",
-            remetente: usuarioAtual,
-            destinatario: contatoAtual,
-            mensagem: txt.value.trim()
-        })
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({
+      tipo: "enviarMensagem",
+      remetente: usuarioAtual,
+      destinatario: contatoAtual,
+      mensagem: texto
     })
-        .then(r => r.json())
-        .then(() => {
-            txt.value = "";
-            carregarMensagens();
-            atualizarDigitando(false);
-        });
+  }).then(() => {
+    document.getElementById("msg").value = "";
+    carregarMensagens();
+  });
 }
 
+// =======================================================
+// 🟪 STATUS DO CONTATO
+// =======================================================
 
+function atualizarStatusContato() {
+  fetch(`${API}?tipo=status&usuario=${contatoAtual}`)
+    .then(r => r.json())
+    .then(res => {
+      let txt = "🔴 Offline";
 
-// ===========================================================
-// CHAMAR CONTATO (BIP BIP BIP)
-// ===========================================================
+      if (res.status === "online") txt = "🟢 Online";
+      if (res.status === "digitando") txt = "💬 Digitando...";
+
+      document.getElementById("statusUsuario").innerText = txt;
+    });
+}
+
+// =======================================================
+// 🟫 DIGITANDO...
+// =======================================================
+
+let timerDigitando;
+
+document.getElementById("msg").addEventListener("input", () => {
+  enviarStatus("digitando");
+
+  clearTimeout(timerDigitando);
+  timerDigitando = setTimeout(() => enviarStatus("online"), 1500);
+});
+
+function enviarStatus(st) {
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({
+      tipo: "status",
+      usuario: usuarioAtual,
+      status: st
+    })
+  });
+}
+
+// =======================================================
+// 📢 CHAMAR — BIP BIP BIP
+// =======================================================
 
 function chamarUsuario() {
-    fetch(API, {
-        method: "POST",
-        body: JSON.stringify({
-            tipo: "notificacao",
-            usuario: contatoAtual,
-            tipoNotif: "chamada",
-            conteudo: `@${usuarioAtual} está chamando você!`
-        })
-    });
-
-    alert("📢 Chamando... BIP BIP BIP!");
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({
+      tipo: "chamar",
+      remetente: usuarioAtual,
+      destinatario: contatoAtual
+    })
+  }).then(() => {
+    alert("Chamando...");
+  });
 }
 
-
-
-// ===========================================================
-// MENU DE 3 PONTINHOS
-// ===========================================================
+// =======================================================
+// ☰ MENU (3 pontinhos)
+// =======================================================
 
 function abrirMenu() {
-    const menu = document.getElementById("menuOpcoes");
-    menu.style.display = menu.style.display === "block" ? "none" : "block";
+  document.getElementById("menuChat").style.display = "block";
 }
 
-// ❌ Limpar conversa
+function fecharMenu() {
+  document.getElementById("menuChat").style.display = "none";
+}
+
+// == Limpar conversa ==
 function limparConversa() {
-    if (!confirm("Tem certeza que deseja limpar TODA a conversa?")) return;
+  if (!confirm("Tem certeza?")) return;
 
-    fetch(API, {
-        method: "POST",
-        body: JSON.stringify({
-            tipo: "limparChat",
-            user1: usuarioAtual,
-            user2: contatoAtual
-        })
-    });
-
-    document.getElementById("areaMensagens").innerHTML = "";
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({
+      tipo: "limparConversa",
+      user1: usuarioAtual,
+      user2: contatoAtual
+    })
+  }).then(() => {
+    alert("Conversa apagada!");
+    carregarMensagens();
+  });
 }
 
-// 🗑 Apagar contato
+// == Apagar contato ==
 function apagarContato() {
-    if (!confirm(`Remover @${contatoAtual} dos contatos?`)) return;
+  if (!confirm("Remover contato?")) return;
 
-    fetch(API, {
-        method: "POST",
-        body: JSON.stringify({
-            tipo: "apagarContato",
-            usuario: usuarioAtual,
-            contato: contatoAtual
-        })
-    }).then(() => carregarContatos());
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({
+      tipo: "apagarContato",
+      usuario: usuarioAtual,
+      contato: contatoAtual
+    })
+  }).then(r => r.json())
+    .then(res => {
+      alert(res.mensagem);
+      contatoAtual = null;
+      carregarContatos();
+      document.getElementById("tituloChat").innerText = "Nenhum chat selecionado";
+      document.getElementById("areaMensagens").innerHTML = "";
+    });
 }
 
-// 🚫 Bloquear contato
+// == Bloquear contato ==
 function bloquearContato() {
-    alert("Bloqueio registrado! (implementação real opcional)");
+  if (!confirm("Bloquear contato?")) return;
+  bloqueados.push(contatoAtual);
+  alert("Contato bloqueado.");
+  fecharMenu();
 }
+
+// =======================================================
+// Fim
+// =======================================================
