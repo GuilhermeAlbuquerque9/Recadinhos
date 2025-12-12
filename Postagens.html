@@ -21,16 +21,15 @@
     </td>
   </tr>
 </table>
-
+  
 <h1>Mural de Recadinhos</h1>
 
-<!-- CAIXA DE PESQUISA -->
-<input type="text" id="pesquisa" placeholder="🔎 Buscar assuntos em recadinhos..." style="width: 300px; padding: 5px; margin-bottom: 20px;">
-<br><br>
+<!-- 🔍 Caixa de Pesquisa -->
+<input id="searchBox" type="text" placeholder="Buscar por palavra ou #hashtag...">
 
 <form id="formRecado">
   <label for="mensagem">Seu recadinho:</label><br>
-  <textarea id="mensagem" name="mensagem" rows="5" cols="40" placeholder="Escreva algo... Você pode mencionar @nomes aqui!" required></textarea><br><br>
+  <textarea id="mensagem" name="mensagem" rows="5" cols="40" placeholder="Escreva algo... Você pode mencionar @nomes aqui e usar #hashtags!" required></textarea><br><br>
 
   <input type="submit" value="Publicar Recadinho">
   <input type="reset" value="Limpar">
@@ -43,16 +42,21 @@
 <ul id="listaPrivados"></ul>
 
 <script>
-// 🔗 COLE SUA API AQUI!
+// API
 const API_URL = "https://script.google.com/macros/s/AKfycbwoha0vHb0khV5__DfiaAxRQKe51YeDlh03QyII-bATjNyJNdGriAMu7xmFEq5Vr0Jd/exec";
 
+// elementos
 const usuarioAtual = localStorage.getItem('usuario') || '';
 const form = document.getElementById('formRecado');
 const listaPublicos = document.getElementById('listaPublicos');
 const listaPrivados = document.getElementById('listaPrivados');
-const pesquisa = document.getElementById('pesquisa');
+const searchBox = document.getElementById('searchBox');
 
-// --- PUBLICAR RECADO ---
+let cacheRecados = []; // para busca em tempo real
+
+// ==============================
+// PUBLICAR RECADO
+// ==============================
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const mensagem = document.getElementById('mensagem').value.trim();
@@ -63,6 +67,7 @@ form.addEventListener('submit', async (e) => {
       method: 'POST',
       body: JSON.stringify({ tipo: 'novoRecado', autor: usuarioAtual || 'Anon', mensagem })
     });
+
     const dados = await resp.json();
     if (dados.status === 'ok') {
       form.reset();
@@ -75,68 +80,84 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-// --- FUNÇÃO DE LIKE / DISLIKE ---
-async function votar(id, tipo) {
-  try {
-    await fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify({ tipo, id })
-    });
-    carregarRecados();
-  } catch (e) {
-    alert("Erro ao votar: " + e);
-  }
+// ==============================
+// GERAR TEXTO COM HASHTAGS
+// ==============================
+function formatarHashtags(texto) {
+  return texto.replace(/#(\w+)/g, (match, tag) => {
+    return `<span class="hashtag" onclick="buscarHashtag('${tag}')">#${tag}</span>`;
+  });
 }
 
-// --- CARREGAR RECADOS ---
+function buscarHashtag(tag) {
+  searchBox.value = "#" + tag;
+  filtrarRecados();
+}
+
+// ==============================
+// CARREGAR RECADOS
+// ==============================
 async function carregarRecados() {
   try {
     const resp = await fetch(API_URL + '?tipo=recadinhos');
     const dados = await resp.json();
 
-    listaPublicos.innerHTML = '';
-    listaPrivados.innerHTML = '';
+    cacheRecados = dados; // salvar temporariamente para busca
 
-    const filtro = pesquisa.value.toLowerCase();
-
-    dados.forEach(r => {
-      const texto = r.mensagem.toLowerCase();
-      if (filtro && !texto.includes(filtro)) return;
-
-      const li = document.createElement('li');
-
-      const mencoes = r.mensagem.match(/@\w+/g);
-
-      // Elemento visual com likes/dislikes
-      li.innerHTML = `
-        <strong>@${r.autor}</strong>: ${r.mensagem}
-        <br>
-        👍 <span>${r.likes || 0}</span>
-        <button onclick="votar('${r.id}', 'likeRecado')">Like</button>
-        &nbsp;
-        👎 <span>${r.dislikes || 0}</span>
-        <button onclick="votar('${r.id}', 'dislikeRecado')">Dislike</button>
-        <br><br>
-      `;
-
-      if (mencoes && usuarioAtual &&
-          mencoes.some(m => m.toLowerCase() === '@' + usuarioAtual.toLowerCase())) {
-        listaPrivados.appendChild(li);
-      } else if (!mencoes) {
-        listaPublicos.appendChild(li);
-      }
-    });
+    renderizar();
   } catch (erro) {
     alert('Erro ao carregar recadinhos: ' + erro);
   }
 }
 
-// Atualização automática
+// ==============================
+// FILTRAR (BUSCAR)
+// ==============================
+function filtrarRecados() {
+  const termo = searchBox.value.trim().toLowerCase();
+
+  if (!termo) {
+    renderizar();
+    return;
+  }
+
+  const filtrados = cacheRecados.filter(r => {
+    const txt = r.mensagem.toLowerCase();
+    return txt.includes(termo);
+  });
+
+  renderizar(filtrados);
+}
+
+// quando digitar, filtra
+searchBox.addEventListener('input', filtrarRecados);
+
+// ==============================
+// RENDERIZAR LISTAS
+// ==============================
+function renderizar(lista = cacheRecados) {
+  listaPublicos.innerHTML = '';
+  listaPrivados.innerHTML = '';
+
+  lista.forEach(r => {
+    const li = document.createElement('li');
+
+    const mencoes = r.mensagem.match(/@\w+/g);
+    const mensagemHTML = formatarHashtags(r.mensagem);
+
+    if (mencoes && usuarioAtual && mencoes.some(m => m.toLowerCase() === '@' + usuarioAtual.toLowerCase())) {
+      li.innerHTML = `<strong>@${r.autor}</strong> para você: ${mensagemHTML}`;
+      listaPrivados.appendChild(li);
+    } else if (!mencoes) {
+      li.innerHTML = `<strong>@${r.autor}</strong>: ${mensagemHTML}`;
+      listaPublicos.appendChild(li);
+    }
+  });
+}
+
+// Atualiza automaticamente
 carregarRecados();
 setInterval(carregarRecados, 8000);
-
-// Atualizar ao digitar na busca
-pesquisa.addEventListener("input", carregarRecados);
 </script>
 
 </body>
