@@ -24,6 +24,10 @@
 
 <h1>Mural de Recadinhos</h1>
 
+<!-- CAIXA DE PESQUISA -->
+<input type="text" id="pesquisa" placeholder="🔎 Buscar assuntos em recadinhos..." style="width: 300px; padding: 5px; margin-bottom: 20px;">
+<br><br>
+
 <form id="formRecado">
   <label for="mensagem">Seu recadinho:</label><br>
   <textarea id="mensagem" name="mensagem" rows="5" cols="40" placeholder="Escreva algo... Você pode mencionar @nomes aqui!" required></textarea><br><br>
@@ -46,8 +50,9 @@ const usuarioAtual = localStorage.getItem('usuario') || '';
 const form = document.getElementById('formRecado');
 const listaPublicos = document.getElementById('listaPublicos');
 const listaPrivados = document.getElementById('listaPrivados');
+const pesquisa = document.getElementById('pesquisa');
 
-// Publicar recado
+// --- PUBLICAR RECADO ---
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const mensagem = document.getElementById('mensagem').value.trim();
@@ -70,7 +75,20 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-// Carregar recados
+// --- FUNÇÃO DE LIKE / DISLIKE ---
+async function votar(id, tipo) {
+  try {
+    await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({ tipo, id })
+    });
+    carregarRecados();
+  } catch (e) {
+    alert("Erro ao votar: " + e);
+  }
+}
+
+// --- CARREGAR RECADOS ---
 async function carregarRecados() {
   try {
     const resp = await fetch(API_URL + '?tipo=recadinhos');
@@ -79,34 +97,47 @@ async function carregarRecados() {
     listaPublicos.innerHTML = '';
     listaPrivados.innerHTML = '';
 
+    const filtro = pesquisa.value.toLowerCase();
+
     dados.forEach(r => {
+      const texto = r.mensagem.toLowerCase();
+      if (filtro && !texto.includes(filtro)) return;
+
       const li = document.createElement('li');
+
       const mencoes = r.mensagem.match(/@\w+/g);
 
-      if (mencoes && usuarioAtual && mencoes.some(m => m.toLowerCase() === '@' + usuarioAtual.toLowerCase())) {
-        li.textContent = `@${r.autor} para você: ${r.mensagem}`;
+      // Elemento visual com likes/dislikes
+      li.innerHTML = `
+        <strong>@${r.autor}</strong>: ${r.mensagem}
+        <br>
+        👍 <span>${r.likes || 0}</span>
+        <button onclick="votar('${r.id}', 'likeRecado')">Like</button>
+        &nbsp;
+        👎 <span>${r.dislikes || 0}</span>
+        <button onclick="votar('${r.id}', 'dislikeRecado')">Dislike</button>
+        <br><br>
+      `;
+
+      if (mencoes && usuarioAtual &&
+          mencoes.some(m => m.toLowerCase() === '@' + usuarioAtual.toLowerCase())) {
         listaPrivados.appendChild(li);
       } else if (!mencoes) {
-        li.textContent = `@${r.autor}: ${r.mensagem}`;
         listaPublicos.appendChild(li);
       }
-      // Menções para outros usuários ficam ocultas
     });
   } catch (erro) {
     alert('Erro ao carregar recadinhos: ' + erro);
   }
 }
 
-// Atualiza o mural
+// Atualização automática
 carregarRecados();
 setInterval(carregarRecados, 8000);
+
+// Atualizar ao digitar na busca
+pesquisa.addEventListener("input", carregarRecados);
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
